@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "466330491198",
+    "project_id": "eyvoinventory-953cd",
+    "storage_bucket": "eyvoinventory-953cd.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:466330491198:android:fba8b44640bbd5af64f46f",
+        "android_client_info": {
+          "package_name": "com.evyo.eyvo_inventory"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAgb_9_M8OEcoFiC3qR_8xweDPwFXCCQD4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
