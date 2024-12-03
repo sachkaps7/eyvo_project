@@ -1,4 +1,4 @@
-package com.example.eyvo_inventory
+package com.eyvo.eyvo_inventory
 
 import io.flutter.embedding.android.FlutterActivity
 
