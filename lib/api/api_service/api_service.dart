@@ -137,6 +137,7 @@ class ApiService {
         return await processResponse(context, response);
       }
     } catch (e) {
+      LoggerData.dataLog("Post request error: $e");
       debugPrint('Post request error: $e');
     }
     return null;
