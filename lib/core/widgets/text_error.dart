@@ -8,10 +8,11 @@ import 'package:flutter/material.dart';
 class ErrorTextViewBox extends StatelessWidget {
   final String iconString;
   final String titleString;
-  const ErrorTextViewBox(
-      {super.key,
-      this.iconString = ImageAssets.errorIcon,
-      this.titleString = AppStrings.requiresValue});
+  const ErrorTextViewBox({
+    super.key,
+    this.iconString = ImageAssets.errorIcon,
+    this.titleString = AppStrings.requiresValue,
+  });
 
   @override
   Widget build(BuildContext context) {

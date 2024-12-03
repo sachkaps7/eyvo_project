@@ -2,7 +2,6 @@
 
 import 'package:eyvo_inventory/api/api_service/api_service.dart';
 import 'package:eyvo_inventory/api/api_service/bloc.dart';
-import 'package:eyvo_inventory/api/response_models/default_api_response.dart';
 import 'package:eyvo_inventory/app/app_prefs.dart';
 import 'package:eyvo_inventory/app/sizes_helper.dart';
 import 'package:eyvo_inventory/core/resources/assets_manager.dart';
@@ -29,7 +28,9 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
   final oldPasswordController = TextEditingController();
   final newPasswordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
+
   final formKey = GlobalKey<FormState>();
+
   bool isOldPasswordError = false;
   bool isPasswordError = false;
   bool isConfirmPasswordError = false;
@@ -207,9 +208,11 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
       backgroundColor: ColorManager.primary,
       appBar: AppBar(
         backgroundColor: ColorManager.darkBlue,
-        title: Text(AppStrings.changePassword,
-            style: getBoldStyle(
-                color: ColorManager.white, fontSize: FontSize.s27)),
+        title: Text(
+          AppStrings.changePassword,
+          style:
+              getBoldStyle(color: ColorManager.white, fontSize: FontSize.s27),
+        ),
         leading: IconButton(
           icon: Image.asset(ImageAssets.backButton),
           onPressed: () {

@@ -1,6 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:eyvo_inventory/api/api_service/api_service.dart';
+import 'package:eyvo_inventory/api/api_service/bloc.dart';
 import 'package:eyvo_inventory/api/response_models/region_response.dart';
 import 'package:eyvo_inventory/app/app_prefs.dart';
 import 'package:eyvo_inventory/app/sizes_helper.dart';
@@ -42,21 +43,32 @@ class _RegionListViewState extends State<RegionListView> {
       isLoading = true;
     });
 
-    Map<String, dynamic> data = {
-      'uid': SharedPrefs().uID,
-    };
-    final jsonResponse =
-        await apiService.postRequest(context, ApiService.regionList, data);
-    if (jsonResponse != null) {
-      final response = RegionResponse.fromJson(jsonResponse);
-      if (response.code == '200') {
-        setState(() {
-          regionItems = response.data;
-        });
-      } else {
-        isError = true;
-        errorText = response.message.join(', ');
-      }
+    // Map<String, dynamic> data = {
+    //   'uid': SharedPrefs().uID,
+    // };
+    //final jsonResponse =
+    //     await apiService.postRequest(context, ApiService.regionList, data);
+    // if (jsonResponse != null) {
+    //   final response = RegionResponse.fromJson(jsonResponse);
+    //   if (response.code == '200') {
+    //     setState(() {
+    //       regionItems = response.data;
+    //     });
+    //   } else {
+    //     isError = true;
+    //     errorText = response.message.join(', ');
+    //   }
+    // }
+
+    var res = await globalBloc.doFetchRegionOfUser(context, SharedPrefs().uID);
+
+    if (res.code == '200') {
+      setState(() {
+        regionItems = res.data;
+      });
+    } else {
+      isError = true;
+      errorText = res.message.join(', ');
     }
 
     setState(() {

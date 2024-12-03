@@ -71,7 +71,6 @@ class _CompanyCodeViewState extends State<CompanyCodeView> {
     });
 
     final clientCode = codeController.text.trim();
-    var res = await globalBloc.afterFillCompanyCodeApi(context, clientCode);
     // Map<String, dynamic> data = {'clientcode': clientCode};
     // final jsonResponse =
     //     await apiService.postRequest(context, ApiService.clientCode, data);
@@ -88,6 +87,8 @@ class _CompanyCodeViewState extends State<CompanyCodeView> {
     //     errorText = response.message.join(', ');
     //   }
     // }
+
+    var res = await globalBloc.afterFillCompanyCodeApi(context, clientCode);
 
     if (res.code == '200') {
       SharedPrefs().companyCode = res.data.clientCode;

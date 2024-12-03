@@ -84,7 +84,6 @@ class _LoginViewPageState extends State<LoginViewPage> {
     // Map<String, dynamic> data = {
     //   'uid': SharedPrefs().uID,
     // };
-    var res = await globalBloc.doFetchLoginUserData(context, SharedPrefs().uID);
     // final jsonResponse =
     //     await apiService.postRequest(context, ApiService.loadLogin, data);
     // if (jsonResponse != null) {
@@ -97,6 +96,8 @@ class _LoginViewPageState extends State<LoginViewPage> {
     //     isLoginWithScan = false;
     //   }
     // }
+    var res = await globalBloc.doFetchLoginUserData(context, SharedPrefs().uID);
+
     if (res.code == '200') {
       setState(() {
         isLoginWithScan = res.data.isLoginWithScan;
@@ -138,8 +139,6 @@ class _LoginViewPageState extends State<LoginViewPage> {
 
     // final jsonResponse =
     //     await apiService.postRequest(context, ApiService.login, data);
-    var res = await globalBloc.doSignInUser(context,
-        userName: username, password: password);
     // if (jsonResponse != null) {
     //   final response = LoginResponse.fromJson(jsonResponse);
     //   if (response.code == '200') {
@@ -153,6 +152,9 @@ class _LoginViewPageState extends State<LoginViewPage> {
     //     errorText = response.message.join(', ');
     //   }
     // }
+    var res = await globalBloc.doSignInUser(context,
+        userName: username, password: password);
+
     if (res.code == '200') {
       SharedPrefs().uID = res.data.uid;
       SharedPrefs().jwtToken = res.data.jwttoken;
