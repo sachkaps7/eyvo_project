@@ -81,30 +81,31 @@ class _LoginViewPageState extends State<LoginViewPage> {
   }
 
   void fetchLoginDetails() async {
-    // Map<String, dynamic> data = {
-    //   'uid': SharedPrefs().uID,
-    // };
-    // final jsonResponse =
-    //     await apiService.postRequest(context, ApiService.loadLogin, data);
-    // if (jsonResponse != null) {
-    //   final response = LoadLoginResponse.fromJson(jsonResponse);
-    //   if (response.code == '200') {
-    //     setState(() {
-    //       isLoginWithScan = response.data.isLoginWithScan;
-    //     });
-    //   } else {
-    //     isLoginWithScan = false;
-    //   }
-    // }
-    var res = await globalBloc.doFetchLoginUserData(context, SharedPrefs().uID);
-
-    if (res.code == '200') {
-      setState(() {
-        isLoginWithScan = res.data.isLoginWithScan;
-      });
-    } else {
-      isLoginWithScan = false;
+    Map<String, dynamic> data = {
+      'uid': SharedPrefs().uID,
+    };
+    final jsonResponse =
+        await apiService.postRequest(context, ApiService.loadLogin, data);
+    if (jsonResponse != null) {
+      final response = LoadLoginResponse.fromJson(jsonResponse);
+      if (response.code == '200') {
+        setState(() {
+          isLoginWithScan = response.data.isLoginWithScan;
+        });
+      } else {
+        isLoginWithScan = false;
+      }
     }
+
+    // var res = await globalBloc.doFetchLoginUserData(context, SharedPrefs().uID);
+
+    // if (res.code == '200') {
+    //   setState(() {
+    //     isLoginWithScan = res.data.isLoginWithScan;
+    //   });
+    // } else {
+    //   isLoginWithScan = false;
+    // }
   }
 
   void validateFields() {
@@ -132,39 +133,40 @@ class _LoginViewPageState extends State<LoginViewPage> {
       SharedPrefs().password = '';
     }
 
-    // Map<String, dynamic> data = {
-    //   'userid': username,
-    //   'password': password,
-    // };
+    Map<String, dynamic> data = {
+      'userid': username,
+      'password': password,
+    };
 
-    // final jsonResponse =
-    //     await apiService.postRequest(context, ApiService.login, data);
-    // if (jsonResponse != null) {
-    //   final response = LoginResponse.fromJson(jsonResponse);
-    //   if (response.code == '200') {
-    //     SharedPrefs().uID = response.data.uid;
-    //     SharedPrefs().jwtToken = response.data.jwttoken;
-    //     SharedPrefs().refreshToken = response.data.jwtrefreshtoken;
-    //     SharedPrefs().userSession = response.data.userSession;
-    //     navigateToScreen(context, const HomeView());
-    //   } else {
-    //     isPasswordError = true;
-    //     errorText = response.message.join(', ');
-    //   }
-    // }
-    var res = await globalBloc.doSignInUser(context,
-        userName: username, password: password);
+    final jsonResponse =
+        await apiService.postRequest(context, ApiService.login, data);
 
-    if (res.code == '200') {
-      SharedPrefs().uID = res.data.uid;
-      SharedPrefs().jwtToken = res.data.jwttoken;
-      SharedPrefs().refreshToken = res.data.jwtrefreshtoken;
-      SharedPrefs().userSession = res.data.userSession;
-      navigateToScreen(context, const HomeView());
-    } else {
-      isPasswordError = true;
-      errorText = res.message.join(', ');
+    if (jsonResponse != null) {
+      final response = LoginResponse.fromJson(jsonResponse);
+      if (response.code == '200') {
+        SharedPrefs().uID = response.data.uid;
+        SharedPrefs().jwtToken = response.data.jwttoken;
+        SharedPrefs().refreshToken = response.data.jwtrefreshtoken;
+        SharedPrefs().userSession = response.data.userSession;
+        navigateToScreen(context, const HomeView());
+      } else {
+        isPasswordError = true;
+        errorText = response.message.join(', ');
+      }
     }
+
+    // var res = await globalBloc.doSignInUser(context,
+    //     userName: username, password: password);
+    // if (res.code == '200') {
+    //   SharedPrefs().uID = res.data.uid;
+    //   SharedPrefs().jwtToken = res.data.jwttoken;
+    //   SharedPrefs().refreshToken = res.data.jwtrefreshtoken;
+    //   SharedPrefs().userSession = res.data.userSession;
+    //   navigateToScreen(context, const HomeView());
+    // } else {
+    //   isPasswordError = true;
+    //   errorText = res.message.join(', ');
+    // }
 
     setState(() {
       isLoading = false;
@@ -245,38 +247,40 @@ class _LoginViewPageState extends State<LoginViewPage> {
       'uid': '$userId',
       'mode': 'scan',
     };
-    // final jsonResponse =
-    //     await apiService.postRequest(context, ApiService.externalLogin, data);
-    var res = await globalBloc.doSignInUserWithBarcode(context,
-        userId: '$userId', mode: 'scan');
+    final jsonResponse =
+        await apiService.postRequest(context, ApiService.externalLogin, data);
 
-    setState(() {
-      if (res.code == '200') {
-        SharedPrefs().uID = res.data.uid;
-        SharedPrefs().jwtToken = res.data.jwttoken;
-        SharedPrefs().refreshToken = res.data.jwtrefreshtoken;
-        SharedPrefs().userSession = res.data.userSession;
-        navigateToScreen(context, const HomeView());
-      } else {
-        isPasswordError = true;
-        errorText = res.message.join(', ');
-      }
-    });
-    // if (jsonResponse != null) {
-    //   final response = LoginResponse.fromJson(jsonResponse);
-    //   setState(() {
-    //     if (response.code == '200') {
-    //       SharedPrefs().uID = response.data.uid;
-    //       SharedPrefs().jwtToken = response.data.jwttoken;
-    //       SharedPrefs().refreshToken = response.data.jwtrefreshtoken;
-    //       SharedPrefs().userSession = response.data.userSession;
-    //       navigateToScreen(context, const HomeView());
-    //     } else {
-    //       isPasswordError = true;
-    //       errorText = response.message.join(', ');
-    //     }
-    //   });
-    // }
+    if (jsonResponse != null) {
+      final response = LoginResponse.fromJson(jsonResponse);
+      setState(() {
+        if (response.code == '200') {
+          SharedPrefs().uID = response.data.uid;
+          SharedPrefs().jwtToken = response.data.jwttoken;
+          SharedPrefs().refreshToken = response.data.jwtrefreshtoken;
+          SharedPrefs().userSession = response.data.userSession;
+          navigateToScreen(context, const HomeView());
+        } else {
+          isPasswordError = true;
+          errorText = response.message.join(', ');
+        }
+      });
+    }
+
+    // var res = await globalBloc.doSignInUserWithBarcode(context,
+    //     userId: '$userId', mode: 'scan');
+
+    // setState(() {
+    //   if (res.code == '200') {
+    //     SharedPrefs().uID = res.data.uid;
+    //     SharedPrefs().jwtToken = res.data.jwttoken;
+    //     SharedPrefs().refreshToken = res.data.jwtrefreshtoken;
+    //     SharedPrefs().userSession = res.data.userSession;
+    //     navigateToScreen(context, const HomeView());
+    //   } else {
+    //     isPasswordError = true;
+    //     errorText = res.message.join(', ');
+    //   }
+    // });
 
     setState(() {
       isLoadingForScan = false;
