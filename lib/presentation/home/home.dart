@@ -68,70 +68,17 @@ class _HomeViewState extends State<HomeView> {
     setState(() {
       isLoading = true;
     });
-    // Map<String, dynamic> data = {
-    //   'uid': SharedPrefs().uID,
-    // };
-    // final jsonResponse =
-    //     await apiService.postRequest(context, ApiService.dashboard, data);
-    // if (jsonResponse != null) {
-    //   final response = DashboardResponse.fromJson(jsonResponse);
-    //   if (response.code == '200') {
-    //     setState(() {
-    //       var dataList = jsonResponse['data'] as String;
-    //       List<dynamic> data = jsonDecode(dataList);
-    //       for (var item in data) {
-    //         item.forEach((key, value) {
-    //           if (value is bool && value == true) {
-    //             if (key != AppStrings.apiKeyRegion &&
-    //                 key != AppStrings.apiKeyEditRegion &&
-    //                 key != AppStrings.apiKeyLocation &&
-    //                 key != AppStrings.apiKeyEditLocation) {
-    //               items.add(key);
-    //             }
-    //           }
-    //         });
-    //       }
-
-    //       if (response.data.isNotEmpty) {
-    //         SharedPrefs().selectedRegionID = response.data[0].regionId;
-    //         SharedPrefs().selectedLocationID = response.data[0].locationId;
-    //         selectRegionTitle = response.data[0].regionLabelName;
-    //         selectedRegion = response.data[0].regionName;
-    //         selectLocationTitle = response.data[0].locationLabelName;
-    //         selectedLocation = response.data[0].locationName;
-    //         isRegionEnabled = response.data[0].region;
-    //         isRegionEditable = response.data[0].regionEdit;
-    //         isLocationEnabled = response.data[0].location;
-    //         isLocationEditable = response.data[0].locationEdit;
-    //         isScanItemsEnabled = response.data[0].scanYourItem;
-    //         isListItemsEnabled = response.data[0].listAllItems;
-    //         isGREnabled = response.data[0].gr;
-    //         SharedPrefs().decimalPlaces = response.data[0].decimalPlaces;
-    //         isPermissionDenied = (!isRegionEnabled &&
-    //                 !isLocationEnabled &&
-    //                 !isScanItemsEnabled &&
-    //                 !isListItemsEnabled &&
-    //                 !isGREnabled)
-    //             ? true
-    //             : false;
-    //       }
-    //     });
-    //   } else {
-    //     isError = true;
-    //     errorText = response.message.join(', ');
-    //   }
-    // }
-
-    final res =
-        await globalBloc.doFetchDashboardItem(context, SharedPrefs().uID);
-    if (res != null) {
-      final response = DashboardResponse.fromJson(res);
+    Map<String, dynamic> data = {
+      'uid': SharedPrefs().uID,
+    };
+    final jsonResponse =
+        await apiService.postRequest(context, ApiService.dashboard, data);
+    if (jsonResponse != null) {
+      final response = DashboardResponse.fromJson(jsonResponse);
       if (response.code == '200') {
         setState(() {
-          var dataList = res['data'] as String;
-
+          var dataList = jsonResponse['data'] as String;
           List<dynamic> data = jsonDecode(dataList);
-
           for (var item in data) {
             item.forEach((key, value) {
               if (value is bool && value == true) {
@@ -174,6 +121,59 @@ class _HomeViewState extends State<HomeView> {
         errorText = response.message.join(', ');
       }
     }
+
+    // final res =
+    //     await globalBloc.doFetchDashboardItem(context, SharedPrefs().uID);
+    // if (res != null) {
+    //   final response = DashboardResponse.fromJson(res);
+    //   if (response.code == '200') {
+    //     setState(() {
+    //       var dataList = res['data'] as String;
+
+    //       List<dynamic> data = jsonDecode(dataList);
+
+    //       for (var item in data) {
+    //         item.forEach((key, value) {
+    //           if (value is bool && value == true) {
+    //             if (key != AppStrings.apiKeyRegion &&
+    //                 key != AppStrings.apiKeyEditRegion &&
+    //                 key != AppStrings.apiKeyLocation &&
+    //                 key != AppStrings.apiKeyEditLocation) {
+    //               items.add(key);
+    //             }
+    //           }
+    //         });
+    //       }
+
+    //       if (response.data.isNotEmpty) {
+    //         SharedPrefs().selectedRegionID = response.data[0].regionId;
+    //         SharedPrefs().selectedLocationID = response.data[0].locationId;
+    //         selectRegionTitle = response.data[0].regionLabelName;
+    //         selectedRegion = response.data[0].regionName;
+    //         selectLocationTitle = response.data[0].locationLabelName;
+    //         selectedLocation = response.data[0].locationName;
+    //         isRegionEnabled = response.data[0].region;
+    //         isRegionEditable = response.data[0].regionEdit;
+    //         isLocationEnabled = response.data[0].location;
+    //         isLocationEditable = response.data[0].locationEdit;
+    //         isScanItemsEnabled = response.data[0].scanYourItem;
+    //         isListItemsEnabled = response.data[0].listAllItems;
+    //         isGREnabled = response.data[0].gr;
+    //         SharedPrefs().decimalPlaces = response.data[0].decimalPlaces;
+    //         isPermissionDenied = (!isRegionEnabled &&
+    //                 !isLocationEnabled &&
+    //                 !isScanItemsEnabled &&
+    //                 !isListItemsEnabled &&
+    //                 !isGREnabled)
+    //             ? true
+    //             : false;
+    //       }
+    //     });
+    //   } else {
+    //     isError = true;
+    //     errorText = response.message.join(', ');
+    //   }
+    // }
 
     setState(() {
       isLoading = false;

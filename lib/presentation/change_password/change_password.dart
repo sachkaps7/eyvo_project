@@ -66,48 +66,48 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
     final oldPassword = oldPasswordController.text.trim();
     final password = newPasswordController.text.trim();
     final userSession = SharedPrefs().userSession;
-    // Map<String, dynamic> data = {
-    //   'uid': uID,
-    //   'oldpassword': oldPassword,
-    //   'password': password,
-    //   'usersession': userSession
-    // };
-    // final jsonResponse =
-    //     await apiService.postRequest(context, ApiService.changePassword, data);
-    // if (jsonResponse != null) {
-    //   final response = DefaultAPIResponse.fromJson(jsonResponse);
-    //   if (response.code == '200') {
-    //     setState(() {
-    //       showSuccessDialog(
-    //           context,
-    //           ImageAssets.passwordChangedImage,
-    //           AppStrings.passwordChangedTitle,
-    //           AppStrings.passwordChangedSubTitle,
-    //           false);
-    //     });
-    //   } else {
-    //     isConfirmPasswordError = true;
-    //     errorText = response.message.join(', ');
-    //   }
-    // }
-    var res = await globalBloc.doChangeUserPassword(context,
-        uID: uID,
-        oldPassword: oldPassword,
-        password: password,
-        userSession: userSession);
-    if (res.code == '200') {
-      setState(() {
-        showSuccessDialog(
-            context,
-            ImageAssets.passwordChangedImage,
-            AppStrings.passwordChangedTitle,
-            AppStrings.passwordChangedSubTitle,
-            false);
-      });
-    } else {
-      isConfirmPasswordError = true;
-      errorText = res.message.join(', ');
+    Map<String, dynamic> data = {
+      'uid': uID,
+      'oldpassword': oldPassword,
+      'password': password,
+      'usersession': userSession
+    };
+    final jsonResponse =
+        await apiService.postRequest(context, ApiService.changePassword, data);
+    if (jsonResponse != null) {
+      final response = DefaultAPIResponse.fromJson(jsonResponse);
+      if (response.code == '200') {
+        setState(() {
+          showSuccessDialog(
+              context,
+              ImageAssets.passwordChangedImage,
+              AppStrings.passwordChangedTitle,
+              AppStrings.passwordChangedSubTitle,
+              false);
+        });
+      } else {
+        isConfirmPasswordError = true;
+        errorText = response.message.join(', ');
+      }
     }
+    // var res = await globalBloc.doChangeUserPassword(context,
+    //     uID: uID,
+    //     oldPassword: oldPassword,
+    //     password: password,
+    //     userSession: userSession);
+    // if (res.code == '200') {
+    //   setState(() {
+    //     showSuccessDialog(
+    //         context,
+    //         ImageAssets.passwordChangedImage,
+    //         AppStrings.passwordChangedTitle,
+    //         AppStrings.passwordChangedSubTitle,
+    //         false);
+    //   });
+    // } else {
+    //   isConfirmPasswordError = true;
+    //   errorText = res.message.join(', ');
+    // }
 
     setState(() {
       isLoading = false;

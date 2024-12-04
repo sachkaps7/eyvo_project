@@ -84,29 +84,29 @@ class _ForgotUserIDViewState extends State<ForgotUserIDView> {
     });
     final email = emailController.text.trim();
     SharedPrefs().userEmail = email;
-    // Map<String, dynamic> data = {
-    //   'email': email,
-    // };
-    // final jsonResponse =
-    //     await apiService.postRequest(context, ApiService.forgotUserID, data);
-    // if (jsonResponse != null) {
-    //   final response = DefaultAPIResponse.fromJson(jsonResponse);
-    //   if (response.code == '200') {
-    //     navigateToScreen(context, const EmailSentView());
-    //   } else {
-    //     isError = true;
-    //     errorText = response.message.join(', ');
-    //   }
-    // }
-
-    var res = await globalBloc.forgotUserId(context, email);
-
-    if (res.code == '200') {
-      navigateToScreen(context, const EmailSentView());
-    } else {
-      isError = true;
-      errorText = res.message.join(', ');
+    Map<String, dynamic> data = {
+      'email': email,
+    };
+    final jsonResponse =
+        await apiService.postRequest(context, ApiService.forgotUserID, data);
+    if (jsonResponse != null) {
+      final response = DefaultAPIResponse.fromJson(jsonResponse);
+      if (response.code == '200') {
+        navigateToScreen(context, const EmailSentView());
+      } else {
+        isError = true;
+        errorText = response.message.join(', ');
+      }
     }
+
+    // var res = await globalBloc.forgotUserId(context, email);
+
+    // if (res.code == '200') {
+    //   navigateToScreen(context, const EmailSentView());
+    // } else {
+    //   isError = true;
+    //   errorText = res.message.join(', ');
+    // }
 
     setState(() {
       isLoading = false;
