@@ -34,6 +34,7 @@
 		<false/>
 	</dict>
 	<key>NSCameraUsageDescription</key>
+	<!-- Camera Access Permission -->
 	<string>Camera access is required for barcode scanning.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
@@ -42,8 +43,15 @@
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
 	<key>UISupportedInterfaceOrientations</key>
+
+	<!-- Background Mode -->
+	<key>UIBackgroundModes</key>
+	<string>Mobile Back ground Mode</string>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
+		<!-- Push And Remote Notification-->
+		<string>fetch</string> 
+  		<string>remote-notification</string>
 	</array>
 </dict>
 </plist>
