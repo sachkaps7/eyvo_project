@@ -11,9 +11,10 @@ import 'package:eyvo_inventory/core/utils.dart';
 import 'package:eyvo_inventory/log_data.dart/logger_data.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:pdf/widgets.dart';
 
 class ApiService {
-  //static const String baseUrl = "https://service.eyvo.net/eBA API 2.0";
+  // static const String baseUrl = "https://service.eyvo.net/eBA API 2.0";
   static const String clientCode = "login/clientcode";
   static const String loadLogin = "login/loadlogin";
   static const String externalLogin = "login/externalaunthenication";
@@ -64,7 +65,7 @@ class ApiService {
   Future<Map<String, dynamic>?> getRequest(
       BuildContext context, String endpoint, Map<String, dynamic> data) async {
     final url = Uri.encodeFull('$baseUrl/$endpoint');
-    debugPrint('PS:- URL: $url');
+    //debugPrint('PS:- URL: $url');
     final token = SharedPrefs().jwtToken;
     final headers = {
       'Content-Type': 'application/json',
@@ -73,21 +74,23 @@ class ApiService {
       'Authorization': 'Bearer $token',
     };
     final body = json.encode(data);
-    debugPrint('PS:- headers: $headers');
-    debugPrint('PS:- body: $body');
+    // debugPrint('PS:- headers: $headers');
+    // debugPrint('PS:- body: $body');
     try {
       final response = await http.get(Uri.parse(url), headers: headers);
-      return await processResponse(context, response);
+      LoggerData.dataLog("Url : $url --Header : $headers --BodyData : $body");
+      return await processResponse(context, response, url);
     } catch (e) {
-      debugPrint('Get request error: $e');
+      LoggerData.dataLog("Url : $url Error : $e");
+      //debugPrint('Get request error: $e');
       rethrow;
     }
   }
 
   Future<Map<String, dynamic>?> postRequest(
       BuildContext context, String endpoint, Map<String, dynamic> data) async {
+    final url = Uri.encodeFull('$baseUrl/$endpoint');
     try {
-      final url = Uri.encodeFull('$baseUrl/$endpoint');
       debugPrint('PS:- URL: $url');
       final token = SharedPrefs().jwtToken;
       final headers = endpoint == clientCode
@@ -109,7 +112,7 @@ class ApiService {
                 };
       final body = json.encode(data);
 
-      LoggerData.dataLog('Url : $url --body: $body'); //--Header : $headers
+      LoggerData.dataLog('Url : $url --Header : $headers --body: $body');
 
       final response = await http.post(
         Uri.parse(url),
@@ -128,22 +131,23 @@ class ApiService {
               postRequest(context, endpoint, data);
             }
           } else {
-            return await processResponse(context, response);
+            return await processResponse(context, response, url);
           }
         } else {
-          return await processResponse(context, response);
+          return await processResponse(context, response, url);
         }
       } else {
-        return await processResponse(context, response);
+        return await processResponse(context, response, url);
       }
     } catch (e) {
-      debugPrint('Post request error: $e');
+      LoggerData.dataLog("Url : $url --Error : $e");
+      //debugPrint('Post request error: $e');
     }
     return null;
   }
 
   Future<Map<String, dynamic>?> processResponse(
-      BuildContext context, http.Response response) async {
+      BuildContext context, http.Response response, String url) async {
     if (response.statusCode == 401) {
       if (response.body.isEmpty) {
         showSnackBar(context,
@@ -156,12 +160,15 @@ class ApiService {
       final jsonResponse = json.decode(response.body);
       // debugPrint('PS:- jsonResponse: $jsonResponse');
       if (response.statusCode == 200 || response.statusCode == 201) {
+        LoggerData.dataLog("Url : $url --Response : $jsonResponse");
         return jsonResponse;
       } else {
         if (response.body.isNotEmpty) {
+          LoggerData.dataLog("Url : $url --Response : $jsonResponse");
           return jsonResponse;
         } else {
-          debugPrint('Error: ${response.statusCode}, ${response.body}');
+          LoggerData.dataLog(
+              'Url : $url --Error: ${response.statusCode}, ${response.body}');
           throw Exception('Failed to process request: ${response.statusCode}');
         }
       }

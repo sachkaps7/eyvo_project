@@ -58,31 +58,31 @@ class _EnterUserIDViewState extends State<EnterUserIDView> {
       isLoading = true;
     });
     final userID = userNameController.text.trim();
-    // Map<String, dynamic> data = {
-    //   'email': SharedPrefs().userEmail,
-    //   'resend': false,
-    //   'userid': userID
-    // };
-    // final jsonResponse =
-    //     await apiService.postRequest(context, ApiService.forgotPassword, data);
-    // if (jsonResponse != null) {
-    //   final response = DefaultAPIResponse.fromJson(jsonResponse);
-    //   if (response.code == '200') {
-    //     navigateToScreen(context, VerifyEmailView(userName: userID));
-    //   } else {
-    //     isError = true;
-    //     errorText = response.message.join(', ');
-    //   }
-    // }
-
-    var res = await globalBloc.forgotUserPassword(context,
-        email: SharedPrefs().userEmail, userID: userID);
-    if (res.code == '200') {
-      navigateToScreen(context, VerifyEmailView(userName: userID));
-    } else {
-      isError = true;
-      errorText = res.message.join(', ');
+    Map<String, dynamic> data = {
+      'email': SharedPrefs().userEmail,
+      'resend': false,
+      'userid': userID
+    };
+    final jsonResponse =
+        await apiService.postRequest(context, ApiService.forgotPassword, data);
+    if (jsonResponse != null) {
+      final response = DefaultAPIResponse.fromJson(jsonResponse);
+      if (response.code == '200') {
+        navigateToScreen(context, VerifyEmailView(userName: userID));
+      } else {
+        isError = true;
+        errorText = response.message.join(', ');
+      }
     }
+
+    // var res = await globalBloc.forgotUserPassword(context,
+    //     email: SharedPrefs().userEmail, userID: userID);
+    // if (res.code == '200') {
+    //   navigateToScreen(context, VerifyEmailView(userName: userID));
+    // } else {
+    //   isError = true;
+    //   errorText = res.message.join(', ');
+    // }
 
     setState(() {
       isLoading = false;
