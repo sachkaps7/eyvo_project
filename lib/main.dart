@@ -14,6 +14,9 @@ void main() async {
     defaultValue: Environment.DEV,
   );
 
+Environment().initConfig(environment);
+
+
   //initialize enviroment in Logger
   LoggerData.environment = environment;
 
