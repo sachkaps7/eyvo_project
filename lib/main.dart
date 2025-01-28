@@ -9,15 +9,13 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   //Enviroment SetUP
-  const String environment = String.fromEnvironment(
-    "ENVIRONMENT",
-    defaultValue: Environment.DEV,
-  );
+  const String environment =
+      String.fromEnvironment("ENVIRONMENT", defaultValue: Environment.PROD);
 
   Environment().initConfig(environment);
 
   //initialize enviroment in Logger
-  LoggerData.environment = environment;
+  LoggerData.logEnviroment = environment;
 
   //Shared Prefs for Store user Data
   await SharedPrefs().init();
