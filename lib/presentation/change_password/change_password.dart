@@ -224,7 +224,8 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
         padding:
             EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
         child: Column(
-          children: [
+          children: [ 
+            Text("Hello"),
             Padding(
               padding: const EdgeInsets.all(25.0),
               child: Container(
