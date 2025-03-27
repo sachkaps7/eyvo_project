@@ -1,8 +1,12 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'dart:developer';
+
+import 'package:eyvo_inventory/CommonCode/global_utils.dart';
 import 'package:eyvo_inventory/api/api_service/api_service.dart';
 import 'package:eyvo_inventory/api/api_service/bloc.dart';
 import 'package:eyvo_inventory/api/response_models/dashboard_response.dart';
+import 'package:eyvo_inventory/api/response_models/location_response.dart';
 import 'package:eyvo_inventory/app/app_prefs.dart';
 import 'package:eyvo_inventory/app/sizes_helper.dart';
 import 'package:eyvo_inventory/core/resources/assets_manager.dart';
@@ -16,7 +20,6 @@ import 'package:eyvo_inventory/core/widgets/custom_card_item.dart';
 import 'package:eyvo_inventory/core/widgets/custom_list_tile.dart';
 import 'package:eyvo_inventory/core/widgets/progress_indicator.dart';
 import 'package:eyvo_inventory/core/widgets/title_header.dart';
-import 'package:eyvo_inventory/log_data.dart/logger_data.dart';
 import 'package:eyvo_inventory/presentation/change_password/change_password.dart';
 import 'package:eyvo_inventory/presentation/item_details/item_details.dart';
 import 'package:eyvo_inventory/presentation/item_list/item_list.dart';
@@ -48,14 +51,18 @@ class _HomeViewState extends State<HomeView> {
   List<String> items = [];
   List<String> menuItems = [];
   String selectRegionTitle = '';
-  String selectedRegion = SharedPrefs().selectedRegion;
   String selectLocationTitle = '';
-  String selectedLocation = SharedPrefs().selectedLocation;
+  String? selectedRegion;
+  String? selectedLocation;
   final ApiService apiService = ApiService();
   bool isError = false;
   String errorText = AppStrings.somethingWentWrong;
+  bool isFetchingLocation = false; // Add this variable
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  int? selectedRegionId;
+  bool isLocationNull = false;
 
   @override
   void initState() {
@@ -105,8 +112,11 @@ class _HomeViewState extends State<HomeView> {
             isLocationEditable = response.data[0].locationEdit;
             isScanItemsEnabled = response.data[0].scanYourItem;
             isListItemsEnabled = response.data[0].listAllItems;
+            selectedRegionId = response.data[0].regionId;
             isGREnabled = response.data[0].gr;
             SharedPrefs().decimalPlaces = response.data[0].decimalPlaces;
+            SharedPrefs().decimalplacesprice =
+                response.data[0].decimalplacesprice;
             isPermissionDenied = (!isRegionEnabled &&
                     !isLocationEnabled &&
                     !isScanItemsEnabled &&
@@ -121,59 +131,6 @@ class _HomeViewState extends State<HomeView> {
         errorText = response.message.join(', ');
       }
     }
-
-    // final res =
-    //     await globalBloc.doFetchDashboardItem(context, SharedPrefs().uID);
-    // if (res != null) {
-    //   final response = DashboardResponse.fromJson(res);
-    //   if (response.code == '200') {
-    //     setState(() {
-    //       var dataList = res['data'] as String;
-
-    //       List<dynamic> data = jsonDecode(dataList);
-
-    //       for (var item in data) {
-    //         item.forEach((key, value) {
-    //           if (value is bool && value == true) {
-    //             if (key != AppStrings.apiKeyRegion &&
-    //                 key != AppStrings.apiKeyEditRegion &&
-    //                 key != AppStrings.apiKeyLocation &&
-    //                 key != AppStrings.apiKeyEditLocation) {
-    //               items.add(key);
-    //             }
-    //           }
-    //         });
-    //       }
-
-    //       if (response.data.isNotEmpty) {
-    //         SharedPrefs().selectedRegionID = response.data[0].regionId;
-    //         SharedPrefs().selectedLocationID = response.data[0].locationId;
-    //         selectRegionTitle = response.data[0].regionLabelName;
-    //         selectedRegion = response.data[0].regionName;
-    //         selectLocationTitle = response.data[0].locationLabelName;
-    //         selectedLocation = response.data[0].locationName;
-    //         isRegionEnabled = response.data[0].region;
-    //         isRegionEditable = response.data[0].regionEdit;
-    //         isLocationEnabled = response.data[0].location;
-    //         isLocationEditable = response.data[0].locationEdit;
-    //         isScanItemsEnabled = response.data[0].scanYourItem;
-    //         isListItemsEnabled = response.data[0].listAllItems;
-    //         isGREnabled = response.data[0].gr;
-    //         SharedPrefs().decimalPlaces = response.data[0].decimalPlaces;
-    //         isPermissionDenied = (!isRegionEnabled &&
-    //                 !isLocationEnabled &&
-    //                 !isScanItemsEnabled &&
-    //                 !isListItemsEnabled &&
-    //                 !isGREnabled)
-    //             ? true
-    //             : false;
-    //       }
-    //     });
-    //   } else {
-    //     isError = true;
-    //     errorText = response.message.join(', ');
-    //   }
-    // }
 
     setState(() {
       isLoading = false;
@@ -226,6 +183,43 @@ class _HomeViewState extends State<HomeView> {
   void logoutUser() {
     Navigator.pushNamedAndRemoveUntil(
         context, Routes.loginRoute, (Route<dynamic> route) => false);
+  }
+
+  void fetchNewLocation(int regionId) async {
+    setState(() {
+      isFetchingLocation = true; // Set fetching location to true
+    });
+
+    Map<String, dynamic> data = {
+      'uid': SharedPrefs().uID,
+      'regionid': regionId
+    };
+    final jsonResponse =
+        await apiService.postRequest(context, ApiService.locationList, data);
+    if (jsonResponse != null) {
+      final response = LocationResponse.fromJson(jsonResponse);
+      if (response.code == '200') {
+        setState(() {
+          selectedLocation = response.data![0].locationCode;
+          SharedPrefs().selectedLocationID = response.data![0].locationId!;
+          isLocationNull = false;
+        });
+      } else if (response.code == '400') {
+        setState(() {
+          selectedLocation = '';
+          isLocationNull = true;
+        });
+      } else {
+        setState(() {
+          isError = true;
+          errorText = response.message.join(', ');
+        });
+      }
+    }
+
+    setState(() {
+      isFetchingLocation = false; // Set fetching location to false
+    });
   }
 
   @override
@@ -323,7 +317,6 @@ class _HomeViewState extends State<HomeView> {
           ],
         ),
       ),
-      // ),
       body: isLoading
           ? const Center(child: CustomProgressIndicator())
           : isPermissionDenied
@@ -358,218 +351,277 @@ class _HomeViewState extends State<HomeView> {
                     ),
                   ),
                 )
-              : Padding(
-                  padding: const EdgeInsets.only(
-                      top: 30, left: 20, right: 20, bottom: 30),
-                  child: Column(
-                    children: [
-                      isRegionEnabled
-                          ? CustomItemCardWithEdit(
-                              imageString: ImageAssets.selectSite,
-                              title: selectRegionTitle,
-                              subtitle: selectedRegion,
-                              onEdit: isRegionEditable
-                                  ? () async {
-                                      final result = await Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => RegionListView(
-                                              selectedItem: selectedRegion,
-                                              selectedTitle: selectRegionTitle),
-                                        ),
-                                      );
-                                      if (result != null) {
-                                        setState(() {
-                                          selectedRegion =
-                                              SharedPrefs().selectedRegion;
-                                        });
+              : SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                        top: 30, left: 20, right: 20, bottom: 30),
+                    child: Column(
+                      children: [
+                        isRegionEnabled
+                            ? CustomItemCardWithEdit(
+                                imageString: ImageAssets.selectSite,
+                                title: selectRegionTitle,
+                                subtitle: selectedRegion!,
+                                onEdit: isRegionEditable
+                                    ? () async {
+                                        final result = await Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                RegionListView(
+                                                    selectedItem:
+                                                        selectedRegion!,
+                                                    selectedTitle:
+                                                        selectRegionTitle),
+                                          ),
+                                        );
+
+                                        if (result != null) {
+                                          setState(() {
+                                            selectedRegion =
+                                                SharedPrefs().selectedRegion;
+                                            selectedRegionId =
+                                                SharedPrefs().selectedRegionID;
+                                          });
+                                          fetchNewLocation(
+                                              SharedPrefs().selectedRegionID);
+                                        }
                                       }
-                                    }
-                                  : () {},
-                              backgroundColor: ColorManager.white,
-                              cornerRadius: 10,
-                              isEditable: isRegionEditable)
-                          : const SizedBox(),
-                      isRegionEnabled
-                          ? const SizedBox(height: 25)
-                          : const SizedBox(),
-                      isLocationEnabled
-                          ? CustomItemCardWithEdit(
-                              imageString: ImageAssets.selectLocation,
-                              title: selectLocationTitle,
-                              subtitle: selectedLocation,
-                              onEdit: isLocationEditable
-                                  ? () async {
-                                      final result = await Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              LocationListView(
+                                    : () {},
+                                backgroundColor: ColorManager.white,
+                                cornerRadius: 10,
+                                isEditable: isRegionEditable)
+                            : const SizedBox(),
+                        isRegionEnabled
+                            ? const SizedBox(height: 25)
+                            : const SizedBox(),
+                        isLocationEnabled
+                            ? Visibility(
+                                visible: !isFetchingLocation,
+                                replacement: const Center(
+                                    child: CircularProgressIndicator()),
+                                child: CustomItemCardWithEdit(
+                                    imageString: ImageAssets.selectLocation,
+                                    title: selectLocationTitle,
+                                    subtitle: selectedLocation ?? "",
+                                    onEdit: isLocationEditable
+                                        ? () async {
+                                            final result = await Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    LocationListView(
                                                   selectedItem:
-                                                      selectedLocation,
+                                                      selectedLocation!,
                                                   selectedTitle:
-                                                      selectLocationTitle),
-                                        ),
-                                      );
-                                      if (result != null) {
-                                        setState(() {
-                                          selectedLocation =
-                                              SharedPrefs().selectedLocation;
-                                        });
-                                      }
-                                    }
-                                  : () {},
-                              backgroundColor: ColorManager.white,
-                              cornerRadius: 10,
-                              isEditable: isLocationEditable)
-                          : const SizedBox(),
-                      isLocationEnabled
-                          ? const SizedBox(height: 25)
-                          : const SizedBox(),
-                      items.length > 1
-                          ? SizedBox(
-                              child: Center(
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    CustomItemCard(
-                                        imageString: items[0] ==
-                                                AppStrings.apiKeyScanItems
-                                            ? ImageAssets.scanYourItems
-                                            : items[0] ==
-                                                    AppStrings.apiKeyListItems
-                                                ? ImageAssets.listAllItems
-                                                : ImageAssets.receiveGoods,
-                                        title: items[0] ==
-                                                AppStrings.apiKeyScanItems
-                                            ? AppStrings.scanYourItem
-                                            : items[0] ==
-                                                    AppStrings.apiKeyListItems
-                                                ? AppStrings.listAllItems
-                                                : AppStrings.receiveGoods,
-                                        backgroundColor: ColorManager.white,
-                                        cornerRadius: 10,
-                                        onTap: () {
-                                          items[0] == AppStrings.apiKeyScanItems
-                                              ? navigateToScanItems()
+                                                      selectLocationTitle,
+                                                  selectedRegioId:
+                                                      selectedRegionId!,
+                                                ),
+                                              ),
+                                            );
+                                            if (result != null) {
+                                              setState(() {
+                                                selectedLocation = SharedPrefs()
+                                                    .selectedLocation;
+                                              });
+                                            }
+                                          }
+                                        : () {},
+                                    backgroundColor: ColorManager.white,
+                                    cornerRadius: 10,
+                                    isEditable: isLocationEditable),
+                              )
+                            : const SizedBox(),
+                        isLocationEnabled
+                            ? const SizedBox(height: 25)
+                            : const SizedBox(),
+                        items.length > 1
+                            ? SizedBox(
+                                child: Center(
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      CustomItemCard(
+                                          imageString: items[0] ==
+                                                  AppStrings.apiKeyScanItems
+                                              ? ImageAssets.scanYourItems
                                               : items[0] ==
                                                       AppStrings.apiKeyListItems
-                                                  ? navigateToListItems()
-                                                  : navigateToReceiveGoods();
-                                        }),
-                                    const Spacer(),
-                                    CustomItemCard(
-                                        imageString: items[1] ==
-                                                AppStrings.apiKeyScanItems
-                                            ? ImageAssets.scanYourItems
-                                            : items[1] ==
-                                                    AppStrings.apiKeyListItems
-                                                ? ImageAssets.listAllItems
-                                                : ImageAssets.receiveGoods,
-                                        title: items[1] ==
-                                                AppStrings.apiKeyScanItems
-                                            ? AppStrings.scanYourItem
-                                            : items[1] ==
-                                                    AppStrings.apiKeyListItems
-                                                ? AppStrings.listAllItems
-                                                : AppStrings.receiveGoods,
-                                        backgroundColor: ColorManager.white,
-                                        cornerRadius: 10,
-                                        onTap: () {
-                                          items[1] == AppStrings.apiKeyScanItems
-                                              ? navigateToScanItems()
+                                                  ? ImageAssets.listAllItems
+                                                  : ImageAssets.receiveGoods,
+                                          title: items[0] ==
+                                                  AppStrings.apiKeyScanItems
+                                              ? AppStrings.scanYourItem
+                                              : items[0] ==
+                                                      AppStrings.apiKeyListItems
+                                                  ? AppStrings.listAllItems
+                                                  : AppStrings.receiveGoods,
+                                          backgroundColor: ColorManager.white,
+                                          cornerRadius: 10,
+                                          onTap: isLocationNull
+                                              ? () {
+                                                  globalUtils.showNegativeSnackBar(
+                                                      context: context,
+                                                      message:
+                                                          "Location Required");
+                                                }
+                                              : () {
+                                                  items[0] ==
+                                                          AppStrings
+                                                              .apiKeyScanItems
+                                                      ? navigateToScanItems()
+                                                      : items[0] ==
+                                                              AppStrings
+                                                                  .apiKeyListItems
+                                                          ? navigateToListItems()
+                                                          : navigateToReceiveGoods();
+                                                }),
+                                      const Spacer(),
+                                      CustomItemCard(
+                                          imageString: items[1] ==
+                                                  AppStrings.apiKeyScanItems
+                                              ? ImageAssets.scanYourItems
                                               : items[1] ==
                                                       AppStrings.apiKeyListItems
-                                                  ? navigateToListItems()
-                                                  : navigateToReceiveGoods();
-                                        }),
-                                  ],
+                                                  ? ImageAssets.listAllItems
+                                                  : ImageAssets.receiveGoods,
+                                          title: items[1] ==
+                                                  AppStrings.apiKeyScanItems
+                                              ? AppStrings.scanYourItem
+                                              : items[1] ==
+                                                      AppStrings.apiKeyListItems
+                                                  ? AppStrings.listAllItems
+                                                  : AppStrings.receiveGoods,
+                                          backgroundColor: ColorManager.white,
+                                          cornerRadius: 10,
+                                          onTap: isLocationNull
+                                              ? () {
+                                                  globalUtils.showNegativeSnackBar(
+                                                      context: context,
+                                                      message:
+                                                          "Location Required");
+                                                }
+                                              : () {
+                                                  items[1] ==
+                                                          AppStrings
+                                                              .apiKeyScanItems
+                                                      ? navigateToScanItems()
+                                                      : items[1] ==
+                                                              AppStrings
+                                                                  .apiKeyListItems
+                                                          ? navigateToListItems()
+                                                          : navigateToReceiveGoods();
+                                                }),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            )
-                          : items.isNotEmpty
-                              ? SizedBox(
-                                  child: Center(
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceEvenly,
-                                      children: [
-                                        CustomItemCard(
-                                            imageString: items[0] ==
-                                                    AppStrings.apiKeyScanItems
-                                                ? ImageAssets.scanYourItems
-                                                : items[0] ==
-                                                        AppStrings
-                                                            .apiKeyListItems
-                                                    ? ImageAssets.listAllItems
-                                                    : ImageAssets.receiveGoods,
-                                            title: items[0] ==
-                                                    AppStrings.apiKeyScanItems
-                                                ? AppStrings.scanYourItem
-                                                : items[0] ==
-                                                        AppStrings
-                                                            .apiKeyListItems
-                                                    ? AppStrings.listAllItems
-                                                    : AppStrings.receiveGoods,
-                                            backgroundColor: ColorManager.white,
-                                            cornerRadius: 10,
-                                            onTap: () {
-                                              items[0] ==
+                              )
+                            : items.isNotEmpty
+                                ? SizedBox(
+                                    child: Center(
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceEvenly,
+                                        children: [
+                                          CustomItemCard(
+                                              imageString: items[0] ==
                                                       AppStrings.apiKeyScanItems
-                                                  ? navigateToScanItems()
+                                                  ? ImageAssets.scanYourItems
                                                   : items[0] ==
                                                           AppStrings
                                                               .apiKeyListItems
-                                                      ? navigateToListItems()
-                                                      : navigateToReceiveGoods();
-                                            }),
-                                        const Spacer(),
-                                      ],
+                                                      ? ImageAssets.listAllItems
+                                                      : ImageAssets
+                                                          .receiveGoods,
+                                              title: items[0] ==
+                                                      AppStrings.apiKeyScanItems
+                                                  ? AppStrings.scanYourItem
+                                                  : items[0] ==
+                                                          AppStrings
+                                                              .apiKeyListItems
+                                                      ? AppStrings.listAllItems
+                                                      : AppStrings.receiveGoods,
+                                              backgroundColor:
+                                                  ColorManager.white,
+                                              cornerRadius: 10,
+                                              onTap: isLocationNull
+                                                  ? () {
+                                                      globalUtils
+                                                          .showNegativeSnackBar(
+                                                              context: context,
+                                                              message:
+                                                                  "Location Required");
+                                                    }
+                                                  : () {
+                                                      items[0] ==
+                                                              AppStrings
+                                                                  .apiKeyScanItems
+                                                          ? navigateToScanItems()
+                                                          : items[0] ==
+                                                                  AppStrings
+                                                                      .apiKeyListItems
+                                                              ? navigateToListItems()
+                                                              : navigateToReceiveGoods();
+                                                    }),
+                                          const Spacer(),
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                )
-                              : const SizedBox(),
-                      const SizedBox(height: 25),
-                      items.length > 2
-                          ? SizedBox(
-                              child: Center(
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    CustomItemCard(
-                                        imageString: items[2] ==
-                                                AppStrings.apiKeyScanItems
-                                            ? ImageAssets.scanYourItems
-                                            : items[2] ==
-                                                    AppStrings.apiKeyListItems
-                                                ? ImageAssets.listAllItems
-                                                : ImageAssets.receiveGoods,
-                                        title: items[2] ==
-                                                AppStrings.apiKeyScanItems
-                                            ? AppStrings.scanYourItem
-                                            : items[2] ==
-                                                    AppStrings.apiKeyListItems
-                                                ? AppStrings.listAllItems
-                                                : AppStrings.receiveGoods,
-                                        backgroundColor: ColorManager.white,
-                                        cornerRadius: 10,
-                                        onTap: () {
-                                          items[2] == AppStrings.apiKeyScanItems
-                                              ? navigateToScanItems()
+                                  )
+                                : const SizedBox(),
+                        const SizedBox(height: 25),
+                        items.length > 2
+                            ? SizedBox(
+                                child: Center(
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      CustomItemCard(
+                                          imageString: items[2] ==
+                                                  AppStrings.apiKeyScanItems
+                                              ? ImageAssets.scanYourItems
                                               : items[2] ==
                                                       AppStrings.apiKeyListItems
-                                                  ? navigateToListItems()
-                                                  : navigateToReceiveGoods();
-                                        }),
-                                    const Spacer(),
-                                  ],
+                                                  ? ImageAssets.listAllItems
+                                                  : ImageAssets.receiveGoods,
+                                          title: items[2] ==
+                                                  AppStrings.apiKeyScanItems
+                                              ? AppStrings.scanYourItem
+                                              : items[2] ==
+                                                      AppStrings.apiKeyListItems
+                                                  ? AppStrings.listAllItems
+                                                  : AppStrings.receiveGoods,
+                                          backgroundColor: ColorManager.white,
+                                          cornerRadius: 10,
+                                          onTap: isLocationNull
+                                              ? () {
+                                                  globalUtils.showNegativeSnackBar(
+                                                      context: context,
+                                                      message:
+                                                          "Location Required");
+                                                }
+                                              : () {
+                                                  items[2] ==
+                                                          AppStrings
+                                                              .apiKeyScanItems
+                                                      ? navigateToScanItems()
+                                                      : items[2] ==
+                                                              AppStrings
+                                                                  .apiKeyListItems
+                                                          ? navigateToListItems()
+                                                          : navigateToReceiveGoods();
+                                                }),
+                                      const Spacer(),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            )
-                          : const SizedBox(),
-                    ],
+                              )
+                            : const SizedBox(),
+                      ],
+                    ),
                   ),
                 ),
     );

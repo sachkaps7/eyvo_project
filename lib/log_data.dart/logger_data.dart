@@ -1,16 +1,16 @@
 import 'dart:developer';
 
 class LoggerData {
-  static String environment = "DEV";
+  static String logEnviroment = "";
 
   static void dataLog(String msg) {
-    if (environment == "DEV" || environment == "STAGING") {
+    if (logEnviroment == "DEV" || logEnviroment == "STAGING") {
       log(msg);
     } else {}
   }
 
   static void dataPrint(String msg) {
-    if (environment == "DEV" || environment == "STAGING") {
+    if (logEnviroment == "DEV" || logEnviroment == "STAGING") {
       print(msg);
     } else {}
   }
